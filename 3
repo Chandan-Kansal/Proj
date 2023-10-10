@@ -1,0 +1,39 @@
+e<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pincode to City and State</title>
+</head>
+<body>
+    <input type="text" id="pincodeInput" placeholder="Enter Pincode">
+    <button id="fetchDetails">Get City and State</button>
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('fetchDetails').addEventListener('click', function () {
+            const pincode = document.getElementById('pincodeInput').value;
+            if (pincode) {
+                fetch(`https://api.postalpincode.in/pincode/${pincode}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data[0].Status === 'Success') {
+                            const postOffice = data[0].PostOffice[0];
+                            const city = postOffice.District;
+                            const state = postOffice.State;
+                            document.getElementById('result').innerHTML = `City: ${city}, State: ${state}`;
+                        } else {
+                            document.getElementById('result').innerHTML = 'Invalid Pincode';
+                        }
+                    })
+                    .catch(error => {
+                        console.error(error);
+                        document.getElementById('result').innerHTML = 'Error occurred while fetching data.';
+                    });
+            } else {
+                document.getElementById('result').innerHTML = 'Please enter a pincode.';
+            }
+        });
+    </script>
+</body>
+</html>
