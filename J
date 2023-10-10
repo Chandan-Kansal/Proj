@@ -1,0 +1,32 @@
+g<script>
+  $(document).ready(function () {
+    // Your existing code here
+    
+    // Add the new code for pincode retrieval here
+    $('#fetchDetails').click(function () {
+      const pincode = $('#pincodeInput').val();
+      if (pincode) {
+        $.ajax({
+          url: `https://api.postalpincode.in/pincode/${pincode}`,
+          type: 'GET',
+          success: function (response) {
+            if (response[0].Status === 'Success') {
+              const postOffice = response[0].PostOffice[0];
+              const city = postOffice.District;
+              const state = postOffice.State;
+
+              $('#result').html(`City: ${city}, State: ${state}`);
+            } else {
+              $('#result').html('Invalid Pincode');
+            }
+          },
+          error: function () {
+            $('#result').html('Error occurred while fetching data.');
+          },
+        });
+      } else {
+        $('#result').html('Please enter a pincode.');
+      }
+    });
+  });
+</script>
