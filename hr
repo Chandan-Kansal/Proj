@@ -32,13 +32,13 @@ public String minimumTimeRoute(int source, int destination) {
             StringBuilder ans = new StringBuilder();
             int temp_num = 0;
             String temp_mode = "";
-            String temp_source = numbermappingstate.get(source);
+            String temp_source = Integer.toString(source);
             String temp_destination = "";
 
             for (int i = 1; i < path.length(); i++) {
                 if (path.charAt(i) == ' ') {
                     ans.append("Take ").append(temp_mode).append(" From ").append(temp_source).append(" to ");
-                    temp_destination = numbermappingstate.get(temp_num);
+                    temp_destination = Integer.toString(temp_num);
                     ans.append(temp_destination).append(" then ");
 
                     temp_num = 0;
