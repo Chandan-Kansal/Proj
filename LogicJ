@@ -1,34 +1,25 @@
-1
+4
 import java.util.*;
 import java.util.Map.Entry;
 
 public class Main {
-    static List<List<Pair<Float, Float, Character, Integer>>> adj = new ArrayList<>();
+    static List<List<Pair<Float, Float>> > adj = new ArrayList<>();
     static Map<String, Integer> stateMappingNumber = new HashMap<>();
     static Map<Integer, String> numberMappingState = new HashMap<>();
     static int countOfState;
 
-    static class Pair<A, B, C, D> {
+    static class Pair<A, B> {
         A first;
         B second;
-        C third;
-        D fourth;
 
         Pair(A first, B second) {
             this.first = first;
             this.second = second;
         }
-
-        Pair(A first, B second, C third, D fourth) {
-            this.first = first;
-            this.second = second;
-            this.third = third;
-            this.fourth = fourth;
-        }
     }
 
     static void addInGraph(int source, int destination, float price, float time, char mode) {
-        adj.get(source).add(new Pair<>(price, time, mode, destination));
+        adj.get(source).add(new Pair<>(price, time));
     }
 
     static void makeGraph(String source, String destination, float price, float time, char mode) {
@@ -53,8 +44,8 @@ public class Main {
     }
 
     static String miniPrice(int source, int destination) {
-        PriorityQueue<Pair<Integer, Pair<Integer, String>> > pq = new PriorityQueue<>(Comparator.comparing(p -> p.first));
-        pq.add(new Pair<>(0, new Pair<>(source, ""));
+        PriorityQueue<Pair<Float, Pair<Integer, String>> > pq = new PriorityQueue<>(Comparator.comparing(p -> p.first));
+        pq.add(new Pair<>(0.0f, new Pair<>(source, ""));
 
         List<Integer> vis = new ArrayList<>(Collections.nCopies(countOfState, 0));
 
@@ -63,7 +54,7 @@ public class Main {
         }
 
         while (!pq.isEmpty()) {
-            int price = pq.peek().first;
+            float price = pq.peek().first;
             int node = pq.peek().second.first;
             String path = pq.peek().second.second;
             pq.poll();
@@ -107,10 +98,10 @@ public class Main {
                 return ans.toString();
             }
 
-            for (Pair<Float, Float, Character, Integer> it : adj.get(node)) {
-                if (vis.get(it.fourth) == 0) {
-                    String temp = " " + it.fourth + "_" + it.third + " ";
-                    pq.add(new Pair<>(price + it.first, new Pair<>(it.fourth, path + temp)));
+            for (Pair<Float, Float> it : adj.get(node)) {
+                if (vis.get(node) == 0) {
+                    String temp = " " + it.first + "_" + it.second + " ";
+                    pq.add(new Pair<>(price + it.first, new Pair<>(node, path + temp)));
                 }
             }
         }
@@ -118,8 +109,8 @@ public class Main {
     }
 
     static void allRoute(int source, int destination) {
-        PriorityQueue<Pair<Integer, Pair<Integer, String>> > pq = new PriorityQueue<>(Comparator.comparing(p -> p.first));
-        pq.add(new Pair<>(0, new Pair<>(source, ""));
+        PriorityQueue<Pair<Float, Pair<Integer, String>> > pq = new PriorityQueue<>(Comparator.comparing(p -> p.first));
+        pq.add(new Pair<>(0.0f, new Pair<>(source, ""));
 
         List<Integer> vis = new ArrayList<>(Collections.nCopies(countOfState, 0));
 
@@ -128,7 +119,7 @@ public class Main {
         }
 
         while (!pq.isEmpty()) {
-            int time = pq.peek().first;
+            float time = pq.peek().first;
             int node = pq.peek().second.first;
             String path = pq.peek().second.second;
             pq.poll();
@@ -169,18 +160,18 @@ public class Main {
                 System.out.println(ans.toString());
             }
 
-            for (Pair<Float, Float, Character, Integer> it : adj.get(node)) {
-                if (vis.get(it.fourth) == 0) {
-                    String temp = " " + it.fourth + "_" + it.third + " ";
-                    pq.add(new Pair<>(time + it.second, new Pair<>(it.fourth, path + temp)));
+            for (Pair<Float, Float> it : adj.get(node)) {
+                if (vis.get(node) == 0) {
+                    String temp = " " + it.first + "_" + it.second + " ";
+                    pq.add(new Pair<>(time + it.second, new Pair<>(node, path + temp)));
                 }
             }
         }
     }
 
     static String minimumTimeRoute(int source, int destination) {
-        PriorityQueue<Pair<Integer, Pair<Integer, String>> > pq = new PriorityQueue<>(Comparator.comparing(p -> p.first));
-        pq.add(new Pair<>(0, new Pair<>(source, ""));
+        PriorityQueue<Pair<Float, Pair<Integer, String>> > pq = new PriorityQueue<>(Comparator.comparing(p -> p.first));
+        pq.add(new Pair<>(0.0f, new Pair<>(source, ""));
 
         List<Integer> vis = new ArrayList<>(Collections.nCopies(countOfState, 0));
 
@@ -189,11 +180,12 @@ public class Main {
         }
 
         while (!pq.isEmpty()) {
-            int time = pq.peek().first;
+            float time = pq.peek().first;
             int node = pq.peek().second.first;
             String path = pq.peek().second.second;
             pq.poll();
-                        vis.set(node, 1);
+            vis.set(node, 1);
+
             if (node == destination) {
                 StringBuilder ans = new StringBuilder();
                 int tempNum = 0;
@@ -201,7 +193,7 @@ public class Main {
                 String tempSource = numberMappingState.get(source);
                 String tempDestination;
 
-                for (int i = 1; i < path.length(); i++) {
+                                for (int i = 1; i < path.length(); i++) {
                     char c = path.charAt(i);
                     if (c == ' ') {
                         ans.append("Take ").append(tempMode).append(" From ").append(tempSource)
@@ -229,10 +221,10 @@ public class Main {
                 return ans.toString();
             }
 
-            for (Pair<Float, Float, Character, Integer> it : adj.get(node)) {
-                if (vis.get(it.fourth) == 0) {
-                    String temp = " " + it.fourth + "_" + it.third + " ";
-                    pq.add(new Pair<>(time + it.second, new Pair<>(it.fourth, path + temp)));
+            for (Pair<Float, Float> it : adj.get(node)) {
+                if (vis.get(node) == 0) {
+                    String temp = " " + it.first + "_" + it.second + " ";
+                    pq.add(new Pair<>(time + it.second, new Pair<>(node, path + temp)));
                 }
             }
         }
@@ -292,3 +284,4 @@ public class Main {
         allRoute(stateMappingNumber.get("Patiala"), stateMappingNumber.get("Pune"));
     }
 }
+
