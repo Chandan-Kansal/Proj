@@ -1,0 +1,294 @@
+1
+import java.util.*;
+import java.util.Map.Entry;
+
+public class Main {
+    static List<List<Pair<Float, Float, Character, Integer>>> adj = new ArrayList<>();
+    static Map<String, Integer> stateMappingNumber = new HashMap<>();
+    static Map<Integer, String> numberMappingState = new HashMap<>();
+    static int countOfState;
+
+    static class Pair<A, B, C, D> {
+        A first;
+        B second;
+        C third;
+        D fourth;
+
+        Pair(A first, B second) {
+            this.first = first;
+            this.second = second;
+        }
+
+        Pair(A first, B second, C third, D fourth) {
+            this.first = first;
+            this.second = second;
+            this.third = third;
+            this.fourth = fourth;
+        }
+    }
+
+    static void addInGraph(int source, int destination, float price, float time, char mode) {
+        adj.get(source).add(new Pair<>(price, time, mode, destination));
+    }
+
+    static void makeGraph(String source, String destination, float price, float time, char mode) {
+        int sourceNum, destinationNum;
+        if (stateMappingNumber.containsKey(source)) {
+            sourceNum = stateMappingNumber.get(source);
+        } else {
+            stateMappingNumber.put(source, countOfState);
+            sourceNum = countOfState;
+            countOfState++;
+        }
+
+        if (stateMappingNumber.containsKey(destination)) {
+            destinationNum = stateMappingNumber.get(destination);
+        } else {
+            stateMappingNumber.put(destination, countOfState);
+            destinationNum = countOfState;
+            countOfState++;
+        }
+
+        addInGraph(sourceNum, destinationNum, price, time, mode);
+    }
+
+    static String miniPrice(int source, int destination) {
+        PriorityQueue<Pair<Integer, Pair<Integer, String>> > pq = new PriorityQueue<>(Comparator.comparing(p -> p.first));
+        pq.add(new Pair<>(0, new Pair<>(source, ""));
+
+        List<Integer> vis = new ArrayList<>(Collections.nCopies(countOfState, 0));
+
+        for (Entry<String, Integer> entry : stateMappingNumber.entrySet()) {
+            numberMappingState.put(entry.getValue(), entry.getKey());
+        }
+
+        while (!pq.isEmpty()) {
+            int price = pq.peek().first;
+            int node = pq.peek().second.first;
+            String path = pq.peek().second.second;
+            pq.poll();
+            vis.set(node, 1);
+
+            if (node == destination) {
+                StringBuilder ans = new StringBuilder();
+                System.out.println(path);
+                int tempNum = 0;
+                String tempMode = "";
+                String tempSource = numberMappingState.get(source);
+                String tempDestination;
+
+                for (int i = 1; i < path.length(); i++) {
+                    char c = path.charAt(i);
+                    if (c == ' ') {
+                        if (!tempMode.isEmpty()) {
+                            ans.append("Take ").append(tempMode).append(" From ").append(tempSource)
+                                    .append(" to ");
+                            tempDestination = numberMappingState.get(tempNum);
+                            ans.append(tempDestination).append(" then ");
+                            tempNum = 0;
+                            tempMode = "";
+                            tempSource = tempDestination;
+                        }
+                    } else if (c == '_') {
+                        continue;
+                    } else if (c >= 'A' && c <= 'Z') {
+                        if (c == 'B') {
+                            tempMode += "Bus";
+                        } else if (c == 'F') {
+                            tempMode += "Flight";
+                        } else {
+                            tempMode += "Train";
+                        }
+                    } else {
+                        tempNum = tempNum * 10 + (c - '0');
+                    }
+                }
+                ans.append(" it will take ").append(price).append(" price that is minimum price");
+                return ans.toString();
+            }
+
+            for (Pair<Float, Float, Character, Integer> it : adj.get(node)) {
+                if (vis.get(it.fourth) == 0) {
+                    String temp = " " + it.fourth + "_" + it.third + " ";
+                    pq.add(new Pair<>(price + it.first, new Pair<>(it.fourth, path + temp)));
+                }
+            }
+        }
+        return "no route";
+    }
+
+    static void allRoute(int source, int destination) {
+        PriorityQueue<Pair<Integer, Pair<Integer, String>> > pq = new PriorityQueue<>(Comparator.comparing(p -> p.first));
+        pq.add(new Pair<>(0, new Pair<>(source, ""));
+
+        List<Integer> vis = new ArrayList<>(Collections.nCopies(countOfState, 0));
+
+        for (Entry<String, Integer> entry : stateMappingNumber.entrySet()) {
+            numberMappingState.put(entry.getValue(), entry.getKey());
+        }
+
+        while (!pq.isEmpty()) {
+            int time = pq.peek().first;
+            int node = pq.peek().second.first;
+            String path = pq.peek().second.second;
+            pq.poll();
+            vis.set(node, 1);
+
+            if (node == destination) {
+                StringBuilder ans = new StringBuilder();
+                int tempNum = 0;
+                String tempMode = "";
+                String tempSource = numberMappingState.get(source);
+                String tempDestination;
+
+                for (int i = 1; i < path.length(); i++) {
+                    char c = path.charAt(i);
+                    if (c == ' ') {
+                        ans.append("Take ").append(tempMode).append(" From ").append(tempSource)
+                                .append(" to ");
+                        tempDestination = numberMappingState.get(tempNum);
+                        ans.append(tempDestination).append(" then ");
+                        tempNum = 0;
+                        tempMode = "";
+                        tempSource = tempDestination;
+                    } else if (c == '_') {
+                        continue;
+                    } else if (c >= 'A' && c <= 'Z') {
+                        if (c == 'B') {
+                            tempMode += "Bus";
+                        } else if (c == 'F') {
+                            tempMode += "Flight";
+                        } else {
+                            tempMode += "Train";
+                        }
+                    } else {
+                        tempNum = tempNum * 10 + (c - '0');
+                    }
+                }
+                ans.append(" it will take ").append(time).append(" hours that is minimum time");
+                System.out.println(ans.toString());
+            }
+
+            for (Pair<Float, Float, Character, Integer> it : adj.get(node)) {
+                if (vis.get(it.fourth) == 0) {
+                    String temp = " " + it.fourth + "_" + it.third + " ";
+                    pq.add(new Pair<>(time + it.second, new Pair<>(it.fourth, path + temp)));
+                }
+            }
+        }
+    }
+
+    static String minimumTimeRoute(int source, int destination) {
+        PriorityQueue<Pair<Integer, Pair<Integer, String>> > pq = new PriorityQueue<>(Comparator.comparing(p -> p.first));
+        pq.add(new Pair<>(0, new Pair<>(source, ""));
+
+        List<Integer> vis = new ArrayList<>(Collections.nCopies(countOfState, 0));
+
+        for (Entry<String, Integer> entry : stateMappingNumber.entrySet()) {
+            numberMappingState.put(entry.getValue(), entry.getKey());
+        }
+
+        while (!pq.isEmpty()) {
+            int time = pq.peek().first;
+            int node = pq.peek().second.first;
+            String path = pq.peek().second.second;
+            pq.poll();
+                        vis.set(node, 1);
+            if (node == destination) {
+                StringBuilder ans = new StringBuilder();
+                int tempNum = 0;
+                String tempMode = "";
+                String tempSource = numberMappingState.get(source);
+                String tempDestination;
+
+                for (int i = 1; i < path.length(); i++) {
+                    char c = path.charAt(i);
+                    if (c == ' ') {
+                        ans.append("Take ").append(tempMode).append(" From ").append(tempSource)
+                                .append(" to ");
+                        tempDestination = numberMappingState.get(tempNum);
+                        ans.append(tempDestination).append(" then ");
+                        tempNum = 0;
+                        tempMode = "";
+                        tempSource = tempDestination;
+                    } else if (c == '_') {
+                        continue;
+                    } else if (c >= 'A' && c <= 'Z') {
+                        if (c == 'B') {
+                            tempMode += "Bus";
+                        } else if (c == 'F') {
+                            tempMode += "Flight";
+                        } else {
+                            tempMode += "Train";
+                        }
+                    } else {
+                        tempNum = tempNum * 10 + (c - '0');
+                    }
+                }
+                ans.append(" it will take ").append(time).append(" hours that is minimum time");
+                return ans.toString();
+            }
+
+            for (Pair<Float, Float, Character, Integer> it : adj.get(node)) {
+                if (vis.get(it.fourth) == 0) {
+                    String temp = " " + it.fourth + "_" + it.third + " ";
+                    pq.add(new Pair<>(time + it.second, new Pair<>(it.fourth, path + temp)));
+                }
+            }
+        }
+        return "no route";
+    }
+
+    public static void main(String[] args) {
+        adj = new ArrayList<>(1000000);
+
+        for (int i = 0; i < 1000000; i++) {
+            adj.add(new ArrayList<>());
+        }
+
+        makeGraph("Delhi", "Chandigarh", 5000.0, 2.0, 'F');
+        makeGraph("Delhi", "Chandigarh", 2000.0, 4.0, 'T');
+        makeGraph("Delhi", "Chandigarh", 300.0, 6.0, 'B');
+
+        makeGraph("Delhi", "Patiala", 1800.0, 6.0, 'T');
+        makeGraph("Delhi", "Patiala", 800.0, 8.0, 'B');
+
+        makeGraph("Delhi", "Pune", 6000.0, 3.0, 'F');
+        makeGraph("Delhi", "Pune", 3500.0, 14.0, 'T');
+        makeGraph("Delhi", "Pune", 2000.0, 20.0, 'B');
+
+        makeGraph("Chandigarh", "Delhi", 4500.0, 2.0, 'F');
+        makeGraph("Chandigarh", "Delhi", 1000.0, 6.0, 'B');
+        makeGraph("Chandigarh", "Delhi", 2000.0, 4.0, 'T');
+
+        makeGraph("Chandigarh", "Patiala", 400.0, 1.0, 'T');
+        makeGraph("Chandigarh", "Patiala", 200.0, 2.0, 'B');
+
+        makeGraph("Chandigarh", "Pune", 8000.0, 4.0, 'F');
+        makeGraph("Chandigarh", "Pune", 4000.0, 18.0, 'T');
+        makeGraph("Chandigarh", "Pune", 3500.0, 24.0, 'B');
+
+        makeGraph("Patiala", "Chandigarh", 400.0, 1.0, 'T');
+        makeGraph("Patiala", "Chandigarh", 200.0, 2.0, 'B');
+        makeGraph("Patiala", "katra", 2000.0, 2.0, 'F');
+
+        makeGraph("Patiala", "Delhi", 1800.0, 6.0, 'T');
+        makeGraph("Patiala", "Delhi", 800.0, 8.0, 'B');
+        makeGraph("Patiala", "Pune", 3800.0, 20.0, 'T');
+
+        makeGraph("Pune", "Delhi", 6500.0, 3.0, 'F');
+        makeGraph("Pune", "Delhi", 3500.0, 14.0, 'T');
+        makeGraph("Pune", "Delhi", 2500.0, 20.0, 'B');
+
+        makeGraph("Pune", "Chandigarh", 8200.0, 4.0, 'F');
+        makeGraph("Pune", "Chandigarh", 3800.0, 18.0, 'T');
+        makeGraph("Pune", "Chandigarh", 3200.0, 24.0, 'B');
+        makeGraph("Pune", "Patiala", 3800.0, 20.0, 'T');
+
+        System.out.println(minimumTimeRoute(stateMappingNumber.get("Patiala"), stateMappingNumber.get("Pune")));
+        System.out.println("*********");
+        System.out.println(miniPrice(stateMappingNumber.get("Patiala"), stateMappingNumber.get("Pune")));
+        System.out.println("*********");
+        allRoute(stateMappingNumber.get("Patiala"), stateMappingNumber.get("Pune"));
+    }
+}
