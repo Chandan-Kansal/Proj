@@ -1,0 +1,134 @@
+4
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.PriorityQueue;
+
+public class Main {
+    static List<Pair<Pair<Float, Float>, Pair<Character, Integer>>>[] adj;
+    static Map<String, Integer> statemappingnumber;
+    static Map<Integer, String> numbermappingstate;
+    static int countOfState;
+
+    static class Pair<A, B> {
+        A first;
+        B second;
+
+        Pair(A first, B second) {
+            this.first = first;
+            this.second = second;
+        }
+    }
+
+    static void pathRemove(StringBuilder s) {
+        int n = s.length() - 1;
+        while (true) {
+            char c = s.charAt(n);
+            if (c == '*') {
+                s.deleteCharAt(n);
+                break;
+            } else {
+                s.deleteCharAt(n);
+            }
+            n = s.length() - 1;
+        }
+    }
+
+    static void dfs(int s, int d, List<Integer> vis, StringBuilder ans, StringBuilder path) {
+        if (s == d) {
+            ans.append(path);
+            ans.append("?");
+            return;
+        }
+
+        vis.set(s, 1);
+
+        for (Pair<Pair<Float, Float>, Pair<Character, Integer>> it : adj[s]) {
+            if (vis.get(it.second.second) == 0) {
+                path.append('*');
+                path.append(numbermappingstate.get(s));
+                path.append("_");
+                path.append(it.second.first);
+                path.append("_");
+                path.append(numbermappingstate.get(it.second.second));
+                dfs(it.second.second, d, vis, ans, path);
+                pathRemove(path);
+            }
+        }
+        vis.set(s, 0);
+    }
+
+    static String allRoutes(int source, int destination) {
+        List<Integer> vis = new ArrayList<>(countOfState);
+        for (int i = 0; i < countOfState; i++) {
+            vis.add(0);
+        }
+        StringBuilder ans = new StringBuilder();
+        StringBuilder path = new StringBuilder();
+        dfs(source, destination, vis, ans, path);
+        return ans.toString();
+    }
+
+    static void addInGraph(int source, int destination, float price, float time, char mode) {
+        adj[source].add(new Pair<>(new Pair<>(price, time), new Pair<>(mode, destination)));
+    }
+
+    static void makeGraph(String source, String destination, float price, float time, char mode) {
+        int sourceNum, destinationNum;
+        if (statemappingnumber.containsKey(source)) {
+            sourceNum = statemappingnumber.get(source);
+        } else {
+            statemappingnumber.put(source, countOfState);
+            sourceNum = countOfState;
+            countOfState++;
+        }
+
+        if (statemappingnumber.containsKey(destination)) {
+            destinationNum = statemappingnumber.get(destination);
+        } else {
+            statemappingnumber.put(destination, countOfState);
+            destinationNum = countOfState;
+            countOfState += 1;
+        }
+        addInGraph(sourceNum, destinationNum, price, time, mode);
+    }
+
+    public static void main(String[] args) {
+        adj = new ArrayList[1000000];
+        for (int i = 0; i < 1000000; i++) {
+            adj[i] = new ArrayList<>();
+        }
+        statemappingnumber = new HashMap<>();
+        numbermappingstate = new HashMap<>();
+        countOfState = 0;
+
+        makeGraph("Delhi", "Chandigarh", 2000.0f, 2.0f, 'F');
+        makeGraph("Delhi", "Chandigarh", 700.0f, 6.0f, 'B');
+        makeGraph("Delhi", "Patiala", 1100.0f, 6.0f, 'T');
+        makeGraph("Delhi", "Patiala", 900.0f, 8.0f, 'B');
+        makeGraph("Delhi", "Jammu", 7000.0f, 4.2f, 'F');
+        makeGraph("Jammu", "Katra", 200.0f, 2.0f, 'B');
+        makeGraph("Jammu", "Patiala", 1100.0f, 11.0f, 'T');
+        makeGraph("Patiala", "Katra", 800.0f, 6.0f, 'T');
+        makeGraph("Patiala", "Katra", 700.0f, 7.0f, 'B');
+
+        makeGraph("Chandigarh", "Delhi", 2000.0f, 2.0f, 'F');
+        makeGraph("Chandigarh", "Delhi", 700.0f, 6.0f, 'B');
+        makeGraph("Patiala", "Delhi", 1100.0f, 6.0f, 'T');
+        makeGraph("Patiala", "Delhi", 900.0f, 8.0f, 'B');
+        makeGraph("Jammu", "Delhi", 7000.0f, 4.2f, 'F');
+        makeGraph("Katra", "Jammu", 200.0f, 2.0f, 'B');
+        makeGraph("Patiala", "Jammu", 1100.0f, 11.0f, 'T');
+        makeGraph("Katra", "Patiala", 800.0f, 6.0f, 'T');
+        makeGraph("Katra", "Patiala", 700.0f, 7.0f, 'B');
+
+        for (Map.Entry<String, Integer> it : statemappingnumber.entrySet()) {
+            numbermappingstate.put(it.getValue(), it.getKey());
+        }
+
+        System.out.println(allRoutes(statemappingnumber.get("Delhi"), statemappingnumber.get("Katra"));
+        // System.out.println(cheapestRoute(statemappingnumber.get("Delhi"), statemappingnumber.get("Katra"));
+        // System.out.println(fastestRoute(statemappingnumber.get("Delhi"), statemappingnumber.get("Katra"));
+    }
+}
